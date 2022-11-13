@@ -8,6 +8,7 @@ public class Menuu {
     private static LinkedList<Customer> customers = new LinkedList<>();
     private static LinkedList<Item> items = new LinkedList<>();
     private static Sale newSale = new Sale();
+    private static ArrayList<Double> allSales =  new ArrayList<>();
     
     public static void main(String[] args) {
         //dummy employee info
@@ -39,6 +40,9 @@ public class Menuu {
         items.add(sugarPack);
         Item milk = new Item("Milk", 0.20, 0212);
         items.add(milk);
+        //dummy sale information
+        newSale.order.add(milk);newSale.order.add(smallTea);allSales.add(newSale.getTotalCost(true)); newSale.order.clear();
+        newSale.order.add(largeTea);newSale.order.add(smallTea);newSale.order.add(sugarPack);allSales.add(newSale.getTotalCost(false)); newSale.order.clear();
         //call main menu
         Menu();
     }
@@ -63,7 +67,7 @@ public class Menuu {
                 SaleMenu();
                 break;
             case 5: 
-                //ReportsMenu
+                ReportsMenu();
                 break;
             case 6: 
                 ItemsMenu();
@@ -89,9 +93,10 @@ public class Menuu {
                for( Employee newE: employees){
                    System.out.println("Employee: "+newE.getName()+ ", "+newE.getAge()+ ", $" + newE.getWage()+" an hour");
                } 
-                EmployeeMenu();
+               EmployeeMenu();
+               break;
             case 2: //Enter the employees time worked
-                 System.out.print("Enter the employees name: ");
+                System.out.print("Enter the employees name: ");
                 String modifyThisOne = scan.next();
                 //found = employee exists
                 boolean Modfound = false;
@@ -157,7 +162,8 @@ public class Menuu {
                 System.out.println("Enter the Employee's age: ");
                 int employeeAge = scan.nextInt();
                 Employee newE = new Employee(employeeName,employeeAge);
-                employees.add(newE);
+               employees.add(newE);
+                thisManager.addEmployee(newE);
                 ManagerMenu();
                 break;
             case 2: //Remove employee
@@ -173,6 +179,7 @@ public class Menuu {
                        if (removeThisOne.equals(Ename)){ //if employee is found, remove
                            found = true;
                            employees.remove(i);
+                           thisManager.removeEmployee(emp_i);
                        }
                 }
                 if (found == false){ //if no match is found, let the user know
@@ -210,7 +217,7 @@ public class Menuu {
             case 4: //Expenses
                 System.out.print("Enter the amount of expenses: ");
                 double expenses = scan.nextDouble();
-                //Manager.setExpenses();
+                thisManager.setExpenses(expenses);
                 ManagerMenu();
                 break;
             case 5: 
@@ -378,20 +385,20 @@ public class Menuu {
                 break;
                 
             case 2: //remove item
-                System.out.print("item's name: ");
+                System.out.println("Enter the item's name: ");
                 String removeThisOne = scan.next();
                 //found = item exists
-                boolean found = false;
+                boolean removeFound = false;
                 while(iIter.hasNext()){
                    //variables to get specific information about the item
                    Item item_i = iIter.next();
                    String Ename = item_i.getName(); 
                        if (removeThisOne.equals(Ename)){ //if item is found, remove
-                           found = true;
+                           removeFound = true;
                            iIter.remove();
                        }
                 }
-                if (found == false){ //if no match is found, let the user know
+                if (removeFound == false){ //if no match is found, let the user know
                     System.out.println("The Item "+removeThisOne+" does not exist.");
                 }
                 else{
@@ -401,7 +408,7 @@ public class Menuu {
                 break;
                 
             case 3: //modify price
-                System.out.print("Enter the item's name: ");
+                System.out.println("Enter the item's name: ");
                 String modifyThisOne = scan.next();
                 //found = item exists
                 boolean Modfound = false;
@@ -412,6 +419,7 @@ public class Menuu {
                    String Ename = item_i.getName(); 
                        if (modifyThisOne.equals(Ename)){ 
                            Modfound = true;
+                           System.out.println("Enter the item's updated price: ");
                            double newPrice = scan.nextDouble();
                            item_i.setCost(newPrice);
                            }
@@ -532,6 +540,7 @@ public class Menuu {
                 System.out.println("Is this customer a member? (true/false):");
                 boolean mem = scan.nextBoolean();
                 System.out.println("Total Cost: "+newSale.getTotalCost(mem));
+                allSales.add(newSale.getTotalCost(mem));
                 newSale.order.clear();
                 SaleMenu();
                 break;
@@ -555,11 +564,17 @@ public class Menuu {
         int option = scan.nextInt();
         switch(option){
             case 1: //report of total profit
-                //System.out.print(Financial.getTotalProfit());
+                System.out.println("Total Profits Report \n--------------------");
+                Financial.getTotalProfit(allSales);
                 ReportsMenu();
                 break;
             case 2: //Report on total expenses
-                //System.out.print(Financial.getTotalExpenses());
+                System.out.println("Total Expenses Report \n--------------------");
+                for(int i=0;i<employees.size();i++){
+                    Employee employee_i = employees.get(i);
+                    System.out.println("The employee "+employee_i.getName()+" worked for "+employee_i.getTimeWorked()+" hours at $"+employee_i.getWage()+" per hour, and earned "+employee_i.getPay());
+                }
+                System.out.println("The total expenses are: "+Financial.getTotalExpenses(employees));
                 ReportsMenu();
                 break;
             case 3: //Main menu
